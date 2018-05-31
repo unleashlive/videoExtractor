@@ -5,11 +5,14 @@
 #  for exif data manipulation
 #
 
-import cv,cv2
+import cv2
+import gi
+gi.require_version('GExiv2', '0.10')
 from gi.repository import GExiv2
 from fractions import Fraction
 import argparse,re,time,os,sys
 import random,math
+import pyexiv2
 
 parser = argparse.ArgumentParser(description='Program transforms video into seperate images for use in visual SFM')
 
@@ -103,11 +106,11 @@ print "Camera Brand:",camera_brand
 for f in files:
     capture = cv2.VideoCapture(f)
 
-    width = capture.get(cv.CV_CAP_PROP_FRAME_WIDTH)
-    height = capture.get(cv.CV_CAP_PROP_FRAME_HEIGHT)
-    fps = capture.get(cv.CV_CAP_PROP_FPS)
-    frame_count =  capture.get(cv.CV_CAP_PROP_FRAME_COUNT)
-    codec = capture.get(cv.CV_CAP_PROP_FOURCC)
+    width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+    height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    frame_count =  capture.get(cv2.CAP_PROP_FRAME_COUNT)
+    codec = capture.get(cv2.CAP_PROP_FOURCC)
 
     print "Starting work on %s now" % f
 
@@ -146,25 +149,29 @@ for f in files:
             cv2.imwrite(path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
            
-            exif = GExiv2.Metadata(path)
-            
+            exif = GExiv2.Metadata()
+            exif.open_path(path)
+            #exif = pyexiv2.ImageMetadata(path)
+            #exif.read()
+
             t = os.path.getctime(path)
             ctime = time.strftime('%d/%m/%Y %H:%M:%S', time.localtime(t))
+            #exif.set_gps_info(-41.3969702721, 122.6295057244, 76)
 
-            exif['Exif.Image.ImageDescription'] = "SEQ#%s"%i
-            exif['Exif.Image.Make'] = camera_brand
-            exif['Exif.Image.Model'] = camera_model
-            exif['Exif.Image.DateTime'] = ctime
-            exif['Exif.Image.Software'] = "https://github.com/eokeeffe/videoExtractor"
-            exif['Exif.Image.Orientation'] = str(0)
+            exif.set_tag_string('Image.ImageDescription',"SEQ#%s"%i)
+            exif.set_tag_string('Exif.Image.Make', camera_brand)
+            exif.set_tag_string('Exif.Image.Model', camera_model)
+            exif.set_tag_string('Exif.Image.DateTime', ctime)
+            #exif['Exif.Image.Software'] = "https://github.com/eokeeffe/videoExtractor"
+            #exif['Exif.Image.Orientation'] = str(0)
 
-            exif['Exif.Photo.UserComment'] = "awesomeness"
-            exif['Exif.Photo.Flash'] = str(flash[0])
-            exif['Exif.Photo.FNumber'] = str(Fraction(math.pow(1.4142, aperture)).limit_denominator(2000))
-            exif['Exif.Photo.FocalLength'] = str(focal_length)
-            exif['Exif.Photo.ApertureValue'] = str(apeture_value)
-            exif['Exif.Photo.ExposureTime'] = str(exposure)
-            exif['Exif.Photo.ExposureBiasValue'] = "0 EV"
-            exif['Exif.Photo.ISOSpeedRatings'] = "50"
-
-            exif.save_file()
+            exif.set_tag_string('Exif.Photo.UserComment', "Unleash live")
+            #exif['Exif.Photo.Flash'] = str(flash[0])
+            exif.set_tag_string('Exif.Photo.FNumber', str(Fraction(math.pow(1.4142, aperture)).limit_denominator(2000)))
+            exif.set_tag_string('Exif.Photo.FocalLength', str(focal_length))
+            exif.set_tag_string('Exif.Photo.ApertureValue', str(apeture_value))
+            exif.set_tag_string('Exif.Photo.ExposureTime', str(exposure))
+            #exif['Exif.Photo.ExposureBiasValue'] = "0 EV"
+            #exif['Exif.Photo.ISOSpeedRatings'] = "50"
+            exif.save_file(path)
+            #exif.write()

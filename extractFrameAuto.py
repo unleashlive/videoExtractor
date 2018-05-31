@@ -5,7 +5,9 @@
 #  for exif data manipulation
 #
 
-import cv,cv2
+import cv2
+import gi
+gi.require_version('GExiv2', '0.10')
 from gi.repository import GExiv2
 from fractions import Fraction
 import argparse,re,time,os,sys
@@ -41,28 +43,28 @@ for f in tf.split(' '):
 # D = diameter of lens
 
 files = [item for sublist in files for item in sublist]
-print "Converting files:",files
+print("Converting files:",files)
 
-exif1 = GExiv2.Metadata(args.still)
-
-print "Using file:%s as exif data input"%args.still
-print "values:"
-print "FNumber:",exif1['Exif.Photo.FNumber']
-print "Focal Length:",exif1['Exif.Photo.FocalLength']
-print "Aperture Value:",exif1['Exif.Photo.ApertureValue']
-print "Camera Model:",exif1['Exif.Image.Model']
-print "Camera Brand:",exif1['Exif.Image.Make']
-
+exif1 = GExiv2.Metadata()
+exif1.open_path(args.still)
+print ("Using file:%s as exif data input"%args.still)
+print ("values:")
+print ("FNumber:",exif1.get_fnumber())
+print ("Focal Length:",exif1.get_focal_length())
+print ("Aperture Value:",exif1.get_tag_string('Exif.Photo.ApertureValue'))
+print ("Camera Model:",exif1.get_tag_string('Exif.Image.Model'))
+print ("Camera Brand:",exif1.get_tag_string('Exif.Image.Make'))
+print ("Camera Exposure Time:",  exif1.get_exposure_time())
 for f in files:
     capture = cv2.VideoCapture(f)
 
-    width = capture.get(cv.CV_CAP_PROP_FRAME_WIDTH)
-    height = capture.get(cv.CV_CAP_PROP_FRAME_HEIGHT)
-    fps = capture.get(cv.CV_CAP_PROP_FPS)
-    frame_count =  capture.get(cv.CV_CAP_PROP_FRAME_COUNT)
-    codec = capture.get(cv.CV_CAP_PROP_FOURCC)
+    width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+    height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    frame_count =  capture.get(cv2.CAP_PROP_FRAME_COUNT)
+    codec = capture.get(cv2.CAP_PROP_FOURCC)
 
-    print "Starting work on %s now" % f
+    print ("Starting work on %s now" % f)
 
     if capture_step > frame_count: frame_count = frame_count - 1
 
@@ -87,8 +89,8 @@ for f in files:
     0x4d, 
     0x4f]
 
-    aperture = Fraction(random.uniform(1.0, 16.0)).limit_denominator(2000)
-    exposure = Fraction(1.0/round(random.randint(8, int(100.0*aperture))+1, -2)).limit_denominator(4000)
+    #aperture = Fraction(random.uniform(1.0, 16.0)).limit_denominator(2000)
+    #exposure = Fraction(1.0/round(random.randint(8, int(100.0*aperture))+1, -2)).limit_denominator(4000)
     
     for i in xrange(int(frame_count)):
         ret, frame = capture.read()
@@ -97,27 +99,23 @@ for f in files:
             sys.stdout.flush()
             path = "%s.jpg"%(i)
             cv2.imwrite(path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
-
-           
-            exif = GExiv2.Metadata(path)
-            
+            fnumber = exif1.get_exif_tag_rational('Exif.Photo.FNumber')
+            focal = exif1.get_exif_tag_rational('Exif.Photo.FocalLength')
+            aperture = exif1.get_exif_tag_rational('Exif.Photo.ApertureValue')
+            exposure = exif1.get_exposure_time()
+            exif = GExiv2.Metadata()
+            exif.open_path(path)
             t = os.path.getctime(path)
             ctime = time.strftime('%d/%m/%Y %H:%M:%S', time.localtime(t))
 
-            exif['Exif.Image.ImageDescription'] = "SEQ#%s"%i
-            exif['Exif.Image.Make'] = exif1['Exif.Image.Make']
-            exif['Exif.Image.Model'] = exif1['Exif.Image.Model']
-            exif['Exif.Image.DateTime'] = ctime
-            exif['Exif.Image.Software'] = "https://github.com/eokeeffe/videoExtractor"
-            exif['Exif.Image.Orientation'] = exif1['Exif.Image.Orientation']
+            exif.set_tag_string('Exif.Image.ImageDescription',"SEQ#%s"%i)
+            exif.set_tag_string('Exif.Image.Make', exif1.get_tag_string('Exif.Image.Make'))
+            exif.set_tag_string('Exif.Image.Model',exif1.get_tag_string('Exif.Image.Model'))
+            exif.set_tag_string('Exif.Image.DateTime', ctime)
+            exif.set_tag_string('Exif.Photo.UserComment', "Unleash live")
 
-            exif['Exif.Photo.UserComment'] = "awesomeness"
-            exif['Exif.Photo.Flash'] = exif1['Exif.Photo.Flash']
-            exif['Exif.Photo.FNumber'] = exif1['Exif.Photo.FNumber']
-            exif['Exif.Photo.FocalLength'] = exif1['Exif.Photo.FocalLength']
-            exif['Exif.Photo.ApertureValue'] = exif1['Exif.Photo.ApertureValue']
-            exif['Exif.Photo.ExposureTime'] = exif1['Exif.Photo.ExposureTime']
-            exif['Exif.Photo.ExposureBiasValue'] = exif1['Exif.Photo.ExposureBiasValue']
-            exif['Exif.Photo.ISOSpeedRatings'] = exif1['Exif.Photo.ISOSpeedRatings']
-
-            exif.save_file()
+            exif.set_exif_tag_rational('Exif.Photo.FNumber', fnumber[0],fnumber[1])
+            exif.set_exif_tag_rational('Exif.Photo.FocalLength', focal[0], focal[1])
+            exif.set_exif_tag_rational('Exif.Photo.ApertureValue',aperture[0],aperture[1])
+            exif.set_exif_tag_rational('Exif.Photo.ExposureTime', exposure[0],exposure[1])
+            exif.save_file(path)
