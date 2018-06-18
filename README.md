@@ -12,8 +12,23 @@ extractFrameAuto.py is the automated script, needs a video file and image to wor
 extractFrameAuto_Calibrate.py is the automated script that will undistort image as well
 as add EXIF information from video images
 
-python extractFrame.py -h will display the arguements you need for input
-
-If you don't have the required libraries to run this, try the installer script
+python extractFrame.py -h will display the arguments you need for input
 
 Tested and Verified on Ubuntu 14.04 LTS
+
+
+# Build docker image
+
+```bash
+docker build -t ua-videoextractor .
+
+```
+
+# Running image
+
+example with mavic pro details
+```bash
+SOURCE_PATH=`readlink -f data`
+docker run -it --mount type=bind,src=${SOURCE_PATH},dst=/data ua-videoextractor -a 227/100 -focal 4.73 -fnumber 2.2 -cb DJI -cm FC220 -file /data/DJI_0817.MP4
+
+```

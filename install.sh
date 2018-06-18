@@ -1,1 +1,0 @@
-sudo apt-get install gir1.2-gexiv2-0.10

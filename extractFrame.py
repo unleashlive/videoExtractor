@@ -94,14 +94,14 @@ def check_focal(val):
         return str(val+"mm")
 
 files = [item for sublist in files for item in sublist]
-print "Converting files:",files
+print("Converting files:", files)
 
-print "values:"
-print "FNumber:",fnumber
-print "Focal Length:",focal_length
-print "Aperture Value:",apeture_value
-print "Camera Model:",camera_model
-print "Camera Brand:",camera_brand
+print("values:")
+print("FNumber:", fnumber)
+print("Focal Length:", focal_length)
+print("Aperture Value:", apeture_value)
+print("Camera Model:", camera_model)
+print("Camera Brand:", camera_brand)
 
 for f in files:
     capture = cv2.VideoCapture(f)
@@ -112,7 +112,7 @@ for f in files:
     frame_count =  capture.get(cv2.CAP_PROP_FRAME_COUNT)
     codec = capture.get(cv2.CAP_PROP_FOURCC)
 
-    print "Starting work on %s now" % f
+    print("Starting work on %s now" % f)
 
     if capture_step > frame_count: frame_count = frame_count - 1
 
