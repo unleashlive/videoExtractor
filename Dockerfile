@@ -1,8 +1,6 @@
 # Build an image that can
 # - extract images with videos
-# - enrich images exif data with camera focal and aperture
-# - run smvs/mve modelling on the images
-# - run orthophoto based on the images
+# - enrich images exif data with camera focal and aperture\
 
 # IMAGE: ubuntu based python 2.7, opencv 3.2
 
