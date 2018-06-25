@@ -47,8 +47,7 @@ Input data folder: /data
 Output data folder: /data/out
 ```bash
 SOURCE_PATH=`readlink -f data`
-docker run -it --mount type=bind,src=${SOURCE_PATH},dst=/data  ua-videoextractor -a 227/100 -focal 4.73 -fnumber 2.2 -cb DJI -cm FC220 -file /data/DJI_0817.MP4 -n 30
-
+docker run -it --mount type=bind,src=${SOURCE_PATH},dst=/data  ua-videoextractor -a 227/100 -focal 4.73 -fnumber 2.2 -cb DJI -cm FC220 -file /data/DJI_0955.MP4 -n 30
 ```
 
 interactive mode
