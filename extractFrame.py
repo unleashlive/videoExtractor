@@ -139,13 +139,14 @@ for f in files:
 
     aperture = Fraction(random.uniform(1.0, 16.0)).limit_denominator(2000)
     exposure = Fraction(1.0/round(random.randint(8, int(100.0*aperture))+1, -2)).limit_denominator(4000)
-    
+    imgNum = 0
     for i in xrange(int(frame_count)):
         ret, frame = capture.read()
         if ret and (i % capture_step == 0):
             sys.stdout.write('saving frame:%s\r'%i)
             sys.stdout.flush()
-            path = "./frames/%s.jpg"%(i)
+            path = "./frames/%s.jpg"%(imgNum)
+            imgNum += 1
             cv2.imwrite(path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
            
