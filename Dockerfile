@@ -23,6 +23,7 @@ RUN apt-get -y update && apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir /video-extractor
+RUN mkdir /video-extractor/frames
 WORKDIR /video-extractor
 
 COPY extractFrame.py /video-extractor
