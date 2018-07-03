@@ -117,7 +117,7 @@ for f in files:
     if capture_step > frame_count: frame_count = frame_count - 1
 
     # aperture = Fraction(random.uniform(1.0, 16.0)).limit_denominator(2000)
-    exposure = Fraction(1.0/round(random.randint(8, int(100.0*aperture_value))+1, -2)).limit_denominator(4000)
+    exposure = Fraction(1.0/round(random.randint(8, int(100.0*float(aperture_value)))+1, -2)).limit_denominator(4000)
     imgNum = 0
     for i in xrange(int(frame_count)):
         ret, frame = capture.read()
