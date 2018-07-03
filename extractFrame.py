@@ -62,7 +62,7 @@ for f in tf.split(' '):
 
 fnumber = args.fnumber
 focal_length = args.focal_length
-apeture_value = args.apeture_value
+aperture_value = args.apeture_value
 camera_model = args.camera_model
 camera_brand = args.camera_brand
 
@@ -99,7 +99,7 @@ print("Converting files:", files)
 print("values:")
 print("FNumber:", fnumber)
 print("Focal Length:", focal_length)
-print("Aperture Value:", apeture_value)
+print("Aperture Value:", aperture_value)
 print("Camera Model:", camera_model)
 print("Camera Brand:", camera_brand)
 
@@ -116,36 +116,15 @@ for f in files:
 
     if capture_step > frame_count: frame_count = frame_count - 1
 
-    ISOSPEEDS = [64, 100, 200, 250, 320, 400, 640, 800, 1000, 1600, 3200]
-
-    SHUTTERSPEEDS = [15, 30, 60, 125, 250, 400, 
-    500, 1000, 1250, 1600, 2000, 4000]
-    
-    FSTOPS = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.7, 
-    1.8, 2, 2.2, 2.4, 2.6, 2.8, 3.2, 3.4, 3.7, 
-    4, 4.4, 4.8, 5.2, 5.6, 6.2, 6.7, 7.3, 8, 8.7, 
-    9.5, 10, 11, 12, 14, 15, 16, 17, 19, 21, 22]
-    
-    flash = [0x00,#No flash
-    0x1, 
-    0x18, 
-    0x19, 
-    0x49, 
-    0x4d, 
-    0x4f, 
-    0x49, 
-    0x4d, 
-    0x4f]
-
-    aperture = Fraction(random.uniform(1.0, 16.0)).limit_denominator(2000)
-    exposure = Fraction(1.0/round(random.randint(8, int(100.0*aperture))+1, -2)).limit_denominator(4000)
+    # aperture = Fraction(random.uniform(1.0, 16.0)).limit_denominator(2000)
+    exposure = Fraction(1.0/round(random.randint(8, int(100.0*aperture_value))+1, -2)).limit_denominator(4000)
     imgNum = 0
     for i in xrange(int(frame_count)):
         ret, frame = capture.read()
         if ret and (i % capture_step == 0):
             sys.stdout.write('saving frame:%s\r'%i)
             sys.stdout.flush()
-            path = "./frames/UA_0%s.jpg"%(imgNum)
+            path = "./frames/UA_%000d.jpg"%(imgNum)
             imgNum += 1
             cv2.imwrite(path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
@@ -168,9 +147,10 @@ for f in files:
 
             exif.set_tag_string('Exif.Photo.UserComment', "Unleash live")
             #exif['Exif.Photo.Flash'] = str(flash[0])
-            exif.set_tag_string('Exif.Photo.FNumber', str(Fraction(math.pow(1.4142, aperture)).limit_denominator(2000)))
-            exif.set_tag_string('Exif.Photo.FocalLength', str(focal_length))
-            exif.set_tag_string('Exif.Photo.ApertureValue', str(apeture_value))
+            exif.set_tag_string('Exif.Photo.FNumber', str(fnumber))
+            # exif.set_tag_string('Exif.Photo.FocalLength', str(focal_length))
+            exif.set_tag_string('Exif.Photo.FocalLengthIn35mmFilm', str(focal_length))
+            exif.set_tag_string('Exif.Photo.ApertureValue', str(aperture_value))
             exif.set_tag_string('Exif.Photo.ExposureTime', str(exposure))
             #exif['Exif.Photo.ExposureBiasValue'] = "0 EV"
             #exif['Exif.Photo.ISOSpeedRatings'] = "50"
