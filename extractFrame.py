@@ -126,7 +126,7 @@ for f in files:
         if ret and (i % capture_step == 0):
             sys.stdout.write('saving frame:%s\r'%i)
             sys.stdout.flush()
-            path = "./frames/UA_%000d.jpg"%(imgNum)
+            path = "./frames/UA_%04d.jpg"%(imgNum)
             imgNum += 1
             cv2.imwrite(path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
